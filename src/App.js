@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Recipe from './Components/recipe.js';
+import Navbar from './Components/navbar.js';
+import Error from './Components/error.js';
 import './App.css';
 require('dotenv').config()
 
@@ -7,8 +9,9 @@ function App() {
   const API_ID = process.env.REACT_APP_API_ID;
   const API_KEY = process.env.REACT_APP_API_KEY;
   const [recipes, setRecipes] = useState([]);
-  const [query, setQuery] = useState('chicken');
+  const [query, setQuery] = useState('chocolate');
   const [searchItem, setSearchItem] = useState('');
+
 
   let fetchRecipe = async () => { //Requests information from API
     try {
@@ -29,7 +32,6 @@ function App() {
   let updateQuery = e => { // Updates value of query and invokes the useEffect hook
     e.preventDefault(); // Prevents page from reloading(Page will refresh by default whenever form is submitted)
     setQuery(searchItem);
-
   }
 
   useEffect(() => {
@@ -37,16 +39,21 @@ function App() {
   }, [query]); // Runs the function every time the value of query is updated and once the page starts/reloads
 
   return (
-    <div className='recipe-book'>
-      <form onSubmit={updateQuery}>
-        <input className='itemName' type='text' onChange={updateSearchItem} />
-        <button type='submit'>Search</button>
-      </form>
+    <div className='main-page'>
+      <Navbar updateQuery={updateQuery} updateSearchItem={updateSearchItem} />
+      <div className='recipe-book'>
 
-      {recipes.map(recipe => (
-        <Recipe key={recipe.recipe.calories} label={recipe.recipe.label} calories={recipe.recipe.calories} image={recipe.recipe.image} />
-      ))}
-
+        {recipes.length > 0 ? recipes.map(recipe => ( // Checks if any recipes are returned
+          <Recipe key={recipe.recipe.calories}
+            label={recipe.recipe.label}
+            calories={recipe.recipe.calories}
+            image={recipe.recipe.image}
+            url={recipe.recipe.url}
+            totalTime={recipe.recipe.totalTime} />
+        ))
+          : <Error />  // Error Page is rendered if no recipes are found
+        }
+      </div>
     </div>
   );
 }
